@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"math/rand"
+	"net"
 	"time"
 )
 
@@ -17,10 +18,16 @@ const (
 type GMKEngine struct {
 	boardSize  int
 	boardState [][]int
+
+	conn *net.UnixConn
 }
 
-type point struct {
+type Point struct {
 	x, y int
+}
+
+func NewPoint(x, y int) Point {
+	return Point{x: x, y: y}
 }
 
 func NewEngine(boardSize int) *GMKEngine {
@@ -38,10 +45,10 @@ func (engine *GMKEngine) resetBoard() {
 	engine.boardState = board
 }
 
-func (engine *GMKEngine) vaildCheckmate() ([]point, bool) {
-	var points []point
+func (engine *GMKEngine) vaildCheckmate() ([]Point, bool) {
+	var Points []Point
 
-	return points, false
+	return Points, false
 }
 
 // @x,@y: 棋盤座標
