@@ -15,25 +15,30 @@ const (
 	WHITECODE = 1
 )
 
-type GMKEngine struct {
-	boardSize  int
-	boardState [][]int
-
-	conn *net.UnixConn
-}
-
 type Point struct {
 	x, y int
 }
 
-func NewPoint(x, y int) Point {
-	return Point{x: x, y: y}
+func NewPoint(x, y int) *Point {
+	if x > 255 || y > 255 {
+		log.Println("x, y must smaller than 255")
+		return nil
+	}
+	return &Point{x: x, y: y}
+}
+
+type GMKEngine struct {
+	boardSize  int
+	boardState [][]int
+
+	conn net.Conn
 }
 
 func NewEngine(boardSize int) *GMKEngine {
 	log.Printf("Create Gomoku engine, board size = %d * %d\n", boardSize, boardSize)
 	board := &GMKEngine{boardSize: boardSize}
 	board.resetBoard()
+	board.buildIpcConnect()
 	return board
 }
 
@@ -43,21 +48,6 @@ func (engine *GMKEngine) resetBoard() {
 		board[i] = make([]int, engine.boardSize)
 	}
 	engine.boardState = board
-}
-
-func (engine *GMKEngine) vaildCheckmate() ([]Point, bool) {
-	var Points []Point
-
-	return Points, false
-}
-
-// @x,@y: 棋盤座標
-func (engine *GMKEngine) step(x, y int) bool {
-	if x > engine.boardSize || y > engine.boardSize {
-		return false
-	}
-
-	return true
 }
 
 func (engine *GMKEngine) PrintBoard() {
@@ -77,7 +67,6 @@ func (engine *GMKEngine) PrintBoard() {
 		}
 		board += "\n"
 	}
-
 	fmt.Println(board)
 }
 

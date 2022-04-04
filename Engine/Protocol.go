@@ -11,7 +11,7 @@ const (
 	GMK_HEADER_LEN  = 7
 )
 
-func NewPacket(Points ...Point) []byte {
+func NewPacket(Points ...*Point) []byte {
 	buffer := bytes.NewBuffer([]byte{})
 	buffer.Write([]byte(GMK_PROT_HEADER))
 	binary.Write(buffer, binary.BigEndian, int8(len(Points)))
@@ -34,7 +34,7 @@ func Unpack(packet []byte) {
 		return
 	}
 
-	points := make([]Point, 0)
+	points := make([]*Point, 0)
 	idx := GMK_HEADER_LEN + 1
 	for idx != length {
 		x := int(packet[idx])
@@ -43,5 +43,8 @@ func Unpack(packet []byte) {
 		idx++
 		points = append(points, NewPoint(x, y))
 	}
-	log.Println(points)
+
+	for _, p := range points {
+		log.Println(p)
+	}
 }

@@ -3,43 +3,54 @@ package Engine
 import (
 	"log"
 	"net"
+	"time"
 )
 
 const (
-	IPC_PATH = "/var/run/gomoku.sock"
+	IPC_PATH = "./gomoku.sock"
 )
 
-func (engine *GMKEngine) BuildIpcConnect() {
-	sockaddr, err := net.ResolveUnixAddr("unix", IPC_PATH)
+func (engine *GMKEngine) buildIpcConnect() {
+	conn, err := net.Dial("unix", IPC_PATH)
+	if err != nil {
+		panic(err)
+	}
+
+	log.Println("Create unix socket connection with ", IPC_PATH)
+	engine.conn = conn
+	for {
+		engine.sendCandiates(NewPacket(NewPoint(10, 20), NewPoint(20, 30), NewPoint(30, 40)))
+
+		buff := make([]byte, 87)
+		_, err = engine.conn.Read(buff)
+		if err != nil {
+			panic(err)
+		}
+		log.Println(buff)
+		time.Sleep(1 * time.Second)
+	}
+}
+
+func (engine *GMKEngine) sendCandiates(packet []byte) {
+	if engine.conn == nil {
+		panic("connection fail")
+	}
+
+	_, err := engine.conn.Write(packet)
 	if err != nil {
 		log.Println(err)
-		return
+	}
+}
+
+func (engine *GMKEngine) getDecision() []byte {
+	if engine.conn == nil {
+		panic("connection fail")
 	}
 
-	sockconn, err := net.DialUnix("unix", nil, sockaddr)
+	buf := make([]byte, 452)
+	decision, err := engine.conn.Read(buf)
 	if err != nil {
 		log.Println(err)
-		return
 	}
-	engine.conn = sockconn
-	engine.boardStateRoutine()
-	defer engine.conn.Close()
-}
-
-func (engine *GMKEngine) boardStateRoutine() {
-	if engine.conn == nil {
-		return
-	}
-	go onMessageReceived(engine.conn)
-}
-
-func onMessageReceived(conn *net.UnixConn) {
-
-}
-
-func (engine *GMKEngine) sendState(state []byte) {
-	if engine.conn == nil {
-		return
-	}
-
+	return buf[0:decision]
 }
