@@ -1,6 +1,8 @@
 package Engine
 
 import (
+	"bytes"
+	"io"
 	"log"
 	"net"
 	"time"
@@ -21,12 +23,15 @@ func (engine *GMKEngine) buildIpcConnect() {
 	for {
 		engine.sendCandiates(NewPacket(NewPoint(10, 20), NewPoint(20, 30), NewPoint(30, 40)))
 
-		buff := make([]byte, 87)
-		_, err = engine.conn.Read(buff)
-		if err != nil {
-			panic(err)
-		}
-		log.Println(buff)
+		// buff := make([]byte, 87)
+		// _, err = engine.conn.Read(buff)
+		// if err != nil {
+		// 	panic(err)
+		// }
+		// log.Println(buff)
+		var buf bytes.Buffer
+		io.Copy(&buf, engine.conn)
+		log.Println(buf.Bytes())
 		time.Sleep(1 * time.Second)
 	}
 }

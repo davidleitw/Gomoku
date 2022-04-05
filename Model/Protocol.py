@@ -34,7 +34,7 @@ class IpcServer():
         length = len(packet)
         if length < HEADER_LEN or packet[0:HEADER_LEN] == "Headers":
             return
-        
+
         num = int(packet[HEADER_LEN])
         if length != HEADER_LEN + 1 + num * 2:
             return
