@@ -1,5 +1,10 @@
 import numpy as np
 
+BLACKCODE=1
+WHITECODE=2    
+
+PlayerCode = (BLACKCODE, WHITECODE)
+
 class Board():
     def __init__(self):
         self.state = np.zeros((15, 15), dtype=int)
@@ -10,13 +15,16 @@ class Board():
     
     def recv_candiates(self, packet: bytearray) -> np.ndarray:
         length = len(packet)
-        candiates_num = int(packet[1])
-        assert(length == candiates_num * 2 + 2)
+        pc = packet[0]
         
-        index = 2
+        index = 1
+        candiates = np.zeros((3, 15, 15), dtype=int)
         while index < length:
+            x, y = packet[index], packet[index+1]
+            index += 2
             candiate = self.state.copy()
-            x = packet[index]
-            y = packet[index+1]
-            candiate[x][y] = player
-            index = index + 2
+            candiate[x][y] = pc
+            candiates[0] = candiate
+        
+        
+        
