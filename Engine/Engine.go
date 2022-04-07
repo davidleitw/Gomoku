@@ -10,9 +10,9 @@ import (
 
 const (
 	BLACKICON = "⬟"
-	BLACKCODE = -1
+	BLACKCODE = 1
 	WHITEICON = "⬠"
-	WHITECODE = 1
+	WHITECODE = 2
 )
 
 type Point struct {
@@ -36,10 +36,13 @@ type GMKEngine struct {
 
 func NewEngine(boardSize int) *GMKEngine {
 	log.Printf("Create Gomoku engine, board size = %d * %d\n", boardSize, boardSize)
-	board := &GMKEngine{boardSize: boardSize}
-	board.resetBoard()
-	board.buildIpcConnect()
-	return board
+	engine := &GMKEngine{boardSize: boardSize}
+	return engine
+}
+
+func (engine *GMKEngine) Run() {
+	engine.resetBoard()
+	engine.buildIpcConnect()
 }
 
 func (engine *GMKEngine) resetBoard() {

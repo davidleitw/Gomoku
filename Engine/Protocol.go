@@ -7,13 +7,29 @@ import (
 )
 
 const (
-	GMK_PROT_HEADER = "Headers"
-	GMK_HEADER_LEN  = 7
+	GMK_PROT_HEADER = "H"
+	GMK_HEADER_LEN  = 1
 )
 
-func NewPacket(Points ...*Point) []byte {
+func NewPackets(Points ...*Point) []byte {
 	buffer := bytes.NewBuffer([]byte{})
 	buffer.Write([]byte(GMK_PROT_HEADER))
+	binary.Write(buffer, binary.BigEndian, int8(len(Points)))
+
+	for _, p := range Points {
+		binary.Write(buffer, binary.BigEndian, int8(p.x))
+		binary.Write(buffer, binary.BigEndian, int8(p.y))
+	}
+	return buffer.Bytes()
+}
+
+func NewPacket(player int, Points ...*Point) []byte {
+	if player != BLACKCODE && player != WHITECODE {
+		return []byte{}
+	}
+
+	buffer := bytes.NewBuffer([]byte{})
+	binary.Write(buffer, binary.BigEndian, int8(player))
 	binary.Write(buffer, binary.BigEndian, int8(len(Points)))
 
 	for _, p := range Points {

@@ -1,10 +1,12 @@
 import os
-import logging
-from pickletools import uint8
 import socket
+import numpy
+import logging
 
-HEADER_LEN = 7
-HEADER = "Headers"
+from .Board import Board
+
+HEADER_LEN = 1
+HEADER = "H"
 
 class IpcServer():
     def __init__(self, sock_path: str):
@@ -14,7 +16,7 @@ class IpcServer():
         
         if os.path.exists(sock_path):
             os.remove(sock_path)
-
+        
         sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
         if sock.fileno() < 0:
             print("socket create error!")
@@ -24,20 +26,17 @@ class IpcServer():
         self.sock.bind(sock_path)
         self.sock.listen(1)
         self.conn, _ = self.sock.accept()
+        self.board = Board()
         
         while True:
-            data = self.conn.recv(572)
+            data = self.conn.recv(452)
             self.get_candiates(bytearray(data))
             self.conn.send(data)
             
     def get_candiates(self, packet: bytearray) ->list:
         length = len(packet)
-        if length < HEADER_LEN or packet[0:HEADER_LEN] == "Headers":
-            return
-
         num = int(packet[HEADER_LEN])
-        if length != HEADER_LEN + 1 + num * 2:
-            return
+        print(length, num, packet)
 
         points = []
         index = HEADER_LEN + 1

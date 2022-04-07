@@ -1,8 +1,6 @@
 package Engine
 
 import (
-	"bytes"
-	"io"
 	"log"
 	"net"
 	"time"
@@ -13,15 +11,20 @@ const (
 )
 
 func (engine *GMKEngine) buildIpcConnect() {
+	log.Printf("Create unix socket connection with %s... ", IPC_PATH)
 	conn, err := net.Dial("unix", IPC_PATH)
 	if err != nil {
+		log.Printf("Failed!\n")
 		panic(err)
 	}
 
-	log.Println("Create unix socket connection with ", IPC_PATH)
+	log.Printf("Success! Start communication with Python RL model.\n")
 	engine.conn = conn
+	// buffer := make([]byte, 0, 572)
+	tmp := make([]byte, 452)
+
 	for {
-		engine.sendCandiates(NewPacket(NewPoint(10, 20), NewPoint(20, 30), NewPoint(30, 40)))
+		engine.sendCandiates(NewPacket(BLACKCODE, NewPoint(10, 20), NewPoint(20, 30), NewPoint(30, 40)))
 
 		// buff := make([]byte, 87)
 		// _, err = engine.conn.Read(buff)
@@ -29,10 +32,14 @@ func (engine *GMKEngine) buildIpcConnect() {
 		// 	panic(err)
 		// }
 		// log.Println(buff)
-		var buf bytes.Buffer
-		io.Copy(&buf, engine.conn)
-		log.Println(buf.Bytes())
-		time.Sleep(1 * time.Second)
+		n, err := engine.conn.Read(tmp)
+		if err != nil {
+			panic(err)
+		}
+
+		// buffer = append(buffer, tmp[:n]...)
+		log.Printf("size of data = %d, data = %d", len(tmp), tmp[:n])
+		time.Sleep(2 * time.Second)
 	}
 }
 
