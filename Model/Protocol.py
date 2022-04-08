@@ -1,6 +1,6 @@
 import os
+import time
 import socket
-import numpy
 import logging
 
 from .Board import Board
@@ -27,27 +27,21 @@ class IpcServer():
         self.sock.listen(1)
         self.conn, _ = self.sock.accept()
         self.board = Board()
-        
+    
+    def run(self) -> None:
         while True:
-            data = self.conn.recv(452)
-            self.get_candiates(bytearray(data))
-            self.conn.send(data)
-            
-    def get_candiates(self, packet: bytearray) ->list:
-        length = len(packet)
-        num = int(packet[HEADER_LEN])
-        print(length, num, packet)
+            actions = self.board.get_candiates(self.recv())
+            print(actions.shape)
+        
+    def demo(self) -> None:
+        while True:
+            actions = self.board.get_candiates(self.conn.recv(452))
+            x, y = map(lambda x: int(x), input("Please input x, y:").split())
+            self.board.step(x, y)
+            self.send(bytes([x, y]))
 
-        points = []
-        index = HEADER_LEN + 1
-        while index < length:
-            x = packet[index]
-            index = index + 1
-            y = packet[index]
-            index = index + 1
-            points.append({x, y})
-
-        print(points)
-
-    def send_decision(self, x: int, y: int) -> None:
-        pass
+    def recv(self) -> bytes:
+        return self.conn.recv(452)
+    
+    def send(self, decision: bytes) -> None:
+        self.conn.send(decision)

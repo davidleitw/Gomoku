@@ -3,9 +3,7 @@ package Engine
 import (
 	"fmt"
 	"log"
-	"math/rand"
 	"net"
-	"time"
 )
 
 const (
@@ -30,19 +28,31 @@ func NewPoint(x, y int) *Point {
 type GMKEngine struct {
 	boardSize  int
 	boardState [][]int
-
-	conn net.Conn
+	player     int
+	conn       net.Conn
 }
 
 func NewEngine(boardSize int) *GMKEngine {
 	log.Printf("Create Gomoku engine, board size = %d * %d\n", boardSize, boardSize)
-	engine := &GMKEngine{boardSize: boardSize}
+	engine := &GMKEngine{boardSize: boardSize, player: BLACKCODE}
 	return engine
 }
 
 func (engine *GMKEngine) Run() {
 	engine.resetBoard()
 	engine.buildIpcConnect()
+	engine.printBoard()
+	for {
+		candiates := engine.allPossibleCandiates()
+		engine.sendCandiates(NewPacket(engine.Player(), candiates...))
+
+		// 接收 RL 模型選擇要下的位置， 並根據回傳結果更新棋盤狀態
+		var decision *Point = ParseDicision(engine.getDecision())
+		engine.step(decision)
+
+		engine.printBoard() // For demo
+		engine.changePlayer()
+	}
 }
 
 func (engine *GMKEngine) resetBoard() {
@@ -53,8 +63,31 @@ func (engine *GMKEngine) resetBoard() {
 	engine.boardState = board
 }
 
-func (engine *GMKEngine) PrintBoard() {
-	engine.randomBoard()
+func (engine *GMKEngine) allPossibleCandiates() []*Point {
+	ps := make([]*Point, 0)
+	for x := 0; x < engine.boardSize; x++ {
+		for y := 0; y < engine.boardSize; y++ {
+			if engine.boardState[x][y] == 0 {
+				ps = append(ps, NewPoint(x, y))
+			}
+		}
+	}
+	return ps
+}
+
+func (engine *GMKEngine) Player() int {
+	return engine.player
+}
+
+func (engine *GMKEngine) changePlayer() {
+	engine.player = engine.player%2 + 1
+}
+
+func (engine *GMKEngine) step(p *Point) {
+	engine.boardState[p.x][p.y] = engine.Player()
+}
+
+func (engine *GMKEngine) printBoard() {
 	board := ""
 	for x := 0; x < engine.boardSize; x++ {
 		for y := 0; y < engine.boardSize; y++ {
@@ -71,14 +104,4 @@ func (engine *GMKEngine) PrintBoard() {
 		board += "\n"
 	}
 	fmt.Println(board)
-}
-
-// To test PrintBoard
-func (engine *GMKEngine) randomBoard() {
-	rand.Seed(time.Now().UnixNano())
-	for x := 0; x < engine.boardSize; x++ {
-		for y := 0; y < engine.boardSize; y++ {
-			engine.boardState[x][y] = -1 + rand.Intn(3)
-		}
-	}
 }
