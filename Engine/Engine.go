@@ -111,14 +111,14 @@ func (brd *board) step(p *Point) {
 
 	wg := new(sync.WaitGroup)
 	wg.Add(8)
-	go brd.judge(p.x, p.y, -1, 0, wg)
-	go brd.judge(p.x, p.y, -1, -1, wg)
-	go brd.judge(p.x, p.y, 0, -1, wg)
-	go brd.judge(p.x, p.y, 1, -1, wg)
-	go brd.judge(p.x, p.y, 1, 0, wg)
-	go brd.judge(p.x, p.y, 1, 1, wg)
-	go brd.judge(p.x, p.y, 0, 1, wg)
-	go brd.judge(p.x, p.y, -1, 1, wg)
+	go brd.judge(wg, p.x, p.y, -1, 0)
+	go brd.judge(wg, p.x, p.y, -1, -1)
+	go brd.judge(wg, p.x, p.y, 0, -1)
+	go brd.judge(wg, p.x, p.y, 1, -1)
+	go brd.judge(wg, p.x, p.y, 1, 0)
+	go brd.judge(wg, p.x, p.y, 1, 1)
+	go brd.judge(wg, p.x, p.y, 0, 1)
+	go brd.judge(wg, p.x, p.y, -1, 1)
 	wg.Wait()
 
 	// 更新 black, white count, 換對手下
@@ -127,11 +127,11 @@ func (brd *board) step(p *Point) {
 	brd.remaining--
 }
 
-func (brd *board) OutofRange(x int) bool {
-	return x < 0 || x > brd.size-1
+func (brd *board) OutofRange(n int) bool {
+	return n < 0 || n > brd.size-1
 }
 
-func (brd *board) judge(tx, ty int, dirX, dirY int, wg *sync.WaitGroup) {
+func (brd *board) judge(wg *sync.WaitGroup, tx, ty, dirX, dirY int) {
 	defer wg.Done()
 	stack := make([]Point, 0)
 
