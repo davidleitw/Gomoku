@@ -5,6 +5,6 @@ import (
 )
 
 func main() {
-	engine := Engine.NewEngine(15)
+	engine := Engine.NewEngine(15, 100)
 	engine.Run()
 }

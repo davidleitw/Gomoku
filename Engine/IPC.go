@@ -9,7 +9,7 @@ const (
 	IPC_PATH = "./gomoku.sock"
 )
 
-func (engine *GMKEngine) buildIpcConnect() {
+func (engine *ReversiEngine) BuildIpcConnect() {
 	log.Printf("Create unix socket connection with %s... ", IPC_PATH)
 	conn, err := net.Dial("unix", IPC_PATH)
 	if err != nil {
@@ -21,7 +21,7 @@ func (engine *GMKEngine) buildIpcConnect() {
 	engine.conn = conn
 }
 
-func (engine *GMKEngine) sendCandiates(packet []byte) {
+func (engine *ReversiEngine) SendCandiates(packet []byte) {
 	if engine.conn == nil {
 		panic("connection fail")
 	}
@@ -32,7 +32,7 @@ func (engine *GMKEngine) sendCandiates(packet []byte) {
 	}
 }
 
-func (engine *GMKEngine) getDecision() []byte {
+func (engine *ReversiEngine) GetDecision() []byte {
 	if engine.conn == nil {
 		panic("connection fail")
 	}
