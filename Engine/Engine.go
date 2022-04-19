@@ -127,23 +127,27 @@ func (brd *board) step(p *Point) {
 	brd.remaining--
 }
 
-func (brd *board) judge(targetX, targetY int, dirX, dirY int, wg *sync.WaitGroup) {
+func (brd *board) OutofRange(x int) bool {
+	return x < 0 || x > brd.size-1
+}
+
+func (brd *board) judge(tx, ty int, dirX, dirY int, wg *sync.WaitGroup) {
 	defer wg.Done()
 	stack := make([]Point, 0)
 
 	for {
-		targetX += dirX
-		targetY += dirY
+		tx += dirX
+		ty += dirY
 
-		if targetX < 0 || targetX > brd.size-1 || targetY < 0 || targetY > brd.size-1 || brd.state[targetX][targetY] == 0 {
+		if brd.OutofRange(tx) || brd.OutofRange(ty) || brd.state[tx][ty] == 0 {
 			return
 		}
 
-		if brd.state[targetX][targetY] == brd.Player() {
+		if brd.state[tx][ty] == brd.Player() {
 			break
 		}
 
-		stack = append(stack, Point{x: targetY, y: targetY})
+		stack = append(stack, Point{x: ty, y: ty})
 	}
 
 	for _, p := range stack {
