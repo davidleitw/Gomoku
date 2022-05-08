@@ -1,7 +1,5 @@
-import Model.Protocol as protocol
-
-ipc_path = "gomoku.sock"
+import Model.Engine as Engine
 
 if __name__ == '__main__':
-    server = protocol.IpcServer(ipc_path)
-    server.demo()
+    engine = Engine.ReversiEngine(15, False, 100)
+    engine.Run()

@@ -24,15 +24,15 @@ func NewPoint(x, y int) *Point {
 
 type board struct {
 	size      int
+	player    int
 	blackCnt  int
 	whiteCnt  int
-	player    int
 	state     [][]int
 	remaining int
 }
 
 func NewBoard(size int) *board {
-	brd := &board{size: size, blackCnt: 0, whiteCnt: 0, player: BLACKCODE}
+	brd := &board{size: size, player: BLACKCODE, blackCnt: 0, whiteCnt: 0}
 	state := make([][]int, size)
 	for i := 0; i < size; i++ {
 		state[i] = make([]int, size)
